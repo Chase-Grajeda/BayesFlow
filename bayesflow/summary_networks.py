@@ -20,9 +20,9 @@
 
 from warnings import warn
 
-import tensorflow as tf
-from tensorflow.keras.layers import GRU, LSTM, Bidirectional, Dense
-from tensorflow.keras.models import Sequential
+import keras
+from keras.layers import GRU, LSTM, Bidirectional, Dense
+from keras.models import Sequential
 
 from bayesflow import default_settings as defaults
 from bayesflow.attention import (
@@ -34,7 +34,7 @@ from bayesflow.attention import (
 from bayesflow.helper_networks import EquivariantModule, InvariantModule, MultiConv1D
 
 
-class TimeSeriesTransformer(tf.keras.Model):
+class TimeSeriesTransformer(keras.Model):
     """Implements a many-to-one transformer architecture for time series encoding.
     Some ideas can be found in [1]:
 
@@ -176,13 +176,13 @@ class TimeSeriesTransformer(tf.keras.Model):
 
         rep = self.attention_blocks(x, **kwargs)
         template = self.template_net(x, **kwargs)
-        rep = self.output_attention(tf.expand_dims(template, axis=1), rep, **kwargs)
-        rep = tf.squeeze(rep, axis=1)
+        rep = self.output_attention(keras.backend.expand_dims(template, axis=1), rep, **kwargs)
+        rep = keras.backend.squeeze(rep, axis=1)
         out = self.output_layer(rep)
         return out
 
 
-class SetTransformer(tf.keras.Model):
+class SetTransformer(keras.Model):
     """Implements the set transformer architecture from [1] which ultimately represents
     a learnable permutation-invariant function. Designed to naturally model interactions in
     the input set, which may be hard to capture with the simpler ``DeepSet`` architecture.
@@ -302,7 +302,7 @@ class SetTransformer(tf.keras.Model):
         return out
 
 
-class DeepSet(tf.keras.Model):
+class DeepSet(keras.Model):
     """Implements a deep permutation-invariant network according to [1] and [2].
 
     [1] Zaheer, M., Kottur, S., Ravanbakhsh, S., Poczos, B., Salakhutdinov, R. R., & Smola, A. J. (2017).
@@ -424,7 +424,7 @@ class InvariantNetwork(DeepSet):
         super().__init__(*args, **kwargs)
 
 
-class SequenceNetwork(tf.keras.Model):
+class SequenceNetwork(keras.Model):
     """Implements a sequence of `MultiConv1D` layers followed by an (bidirectional) LSTM network.
 
     For details and rationale, see [1]:
@@ -514,7 +514,7 @@ class SequentialNetwork(SequenceNetwork):
         super().__init__(*args, **kwargs)
 
 
-class SplitNetwork(tf.keras.Model):
+class SplitNetwork(keras.Model):
     """Implements a vertical stack of networks and concatenates their individual outputs. Allows for splitting
     of data to provide an individual network for each split of the data.
     """
@@ -573,11 +573,12 @@ class SplitNetwork(tf.keras.Model):
         """
 
         out = [self.networks[i](self.split_data_configurator(i, x), **kwargs) for i in range(self.num_splits)]
-        out = tf.concat(out, axis=-1)
+        # out = tf.concat(out, axis=-1)
+        out = keras.backend.concatenate(out, axis=-1)
         return out
 
 
-class HierarchicalNetwork(tf.keras.Model):
+class HierarchicalNetwork(keras.Model):
     """Implements a hierarchical summary network according to [1].
 
     [1] Elsemüller, L., Schnuerch, M., Bürkner, P. C., & Radev, S. T. (2023).
