@@ -208,7 +208,7 @@ class InvertibleNetwork(keras.Model):
                 targets += noise_scale * keras.backend.random_normal(shape=target_shape)
 
             # Augment condition with noise scale variate
-            condition = keras.backend.concatenate((condition, noise_scale), axis=-1)
+            condition = keras.layers.Concatenate(axis=-1)([condition, noise_scale])
 
         z = targets
         log_det_Js = []
@@ -234,7 +234,7 @@ class InvertibleNetwork(keras.Model):
             noise_scale = keras.backend.zeros(shape=shape_scale) + 2.0 * self.soft_low
 
             # Augment condition with noise scale variate
-            condition = keras.backend.concatenate((condition, noise_scale), axis=-1)
+            condition = keras.layers.Concatenate(axis=-1)([condition, noise_scale])
 
         target = z
         for layer in reversed(self.coupling_layers):

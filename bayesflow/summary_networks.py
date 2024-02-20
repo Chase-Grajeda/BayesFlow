@@ -573,8 +573,7 @@ class SplitNetwork(keras.Model):
         """
 
         out = [self.networks[i](self.split_data_configurator(i, x), **kwargs) for i in range(self.num_splits)]
-        # out = tf.concat(out, axis=-1)
-        out = keras.backend.concatenate(out, axis=-1)
+        out = keras.layers.Concatenate(axis=-1)([out])
         return out
 
 
